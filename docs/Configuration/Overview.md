@@ -6,8 +6,8 @@ menuOrder: 1
 ---
 
 Cube.js is designed to work with different configuration sources. There are two
-main ways you can set configuration options; via [a configuration
-file][link-config], commonly known as the `cube.js` file, and [environment
+ways you can set configuration options; via [a configuration file][link-config],
+commonly known as the `cube.js` file, and [environment
 variables][link-env-vars].
 
 [link-config]: /config
@@ -60,9 +60,9 @@ module.exports = {
 
 Since [`v0.23`][link-v-023-release], Cube.js CLI uses the `docker` template
 instead of `express` as a default for project creation, and it is the
-recommended route for production. To migrate you should move all of your Cube.js
-dependencies in `package.json` to `devDependencies` and leave all of your
-dependencies that you use to configure Cube.js in `dependencies`.
+recommended route for production. To migrate you should move all Cube.js
+dependencies in `package.json` to `devDependencies` and leave dependencies that
+you use to configure Cube.js in `dependencies`.
 
 [link-v-023-release]: https://github.com/cube-js/cube.js/releases/tag/v0.23.0
 
