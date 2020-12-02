@@ -1,0 +1,23 @@
+{
+  "name": "@cubejs-backend/azuretables-driver",
+  "description": "Cube.js Azure Storage Tables driver",
+  "author": "Cube Dev, Inc.",
+  "version": "0.24.3",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cube-js/cube.js.git",
+    "directory": "packages/cubejs-azuretables-driver"
+  },
+  "engines": {
+    "node": ">=8.11.1"
+  },
+  "main": "driver/AzureTablesDriver.js",
+  "dependencies": {
+    "@cubejs-backend/query-orchestrator": "^0.24.3",
+    "azure-storage": "^2.10.3"
+  },
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  }
+}

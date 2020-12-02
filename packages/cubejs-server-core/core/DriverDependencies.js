@@ -19,4 +19,5 @@ module.exports = {
   dremio: '@cubejs-backend/dremio-driver',
   druid: '@cubejs-backend/druid-driver',
   cubestore: '@cubejs-backend/cubestore-driver',
+  azuretables: '@cubejs-backend/azuretables-driver',
 };
