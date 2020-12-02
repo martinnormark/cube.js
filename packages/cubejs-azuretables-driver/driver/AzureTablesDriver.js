@@ -77,4 +77,4 @@ class AzureTablesDriver extends BaseDriver {
   }
 }
 
-module.exports = MSSqlDriver;
+module.exports = AzureTablesDriver;
