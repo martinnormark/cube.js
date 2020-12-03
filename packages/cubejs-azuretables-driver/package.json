@@ -14,6 +14,7 @@
   "main": "driver/AzureTablesDriver.js",
   "dependencies": {
     "@cubejs-backend/query-orchestrator": "^0.24.3",
+    "@cubejs-backend/schema-compiler": "^0.24.1",
     "azure-storage": "^2.10.3"
   },
   "license": "Apache-2.0",

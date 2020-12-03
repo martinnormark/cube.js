@@ -1,62 +1,103 @@
 const { BaseDriver } = require('@cubejs-backend/query-orchestrator');
+const AzureTablesQuery = require('./AzureTablesQuery');
+
+const azure = require('azure-storage');
 
 class AzureTablesDriver extends BaseDriver {
   constructor(config) {
     super();
     this.config = {
-      server: process.env.CUBEJS_DB_HOST, // windows.net
-      database: process.env.CUBEJS_DB_NAME, // account
-      password: process.env.CUBEJS_DB_PASS, // key
-      domain: process.env.CUBEJS_DB_DOMAIN && process.env.CUBEJS_DB_DOMAIN.trim().length > 0 ?
-        process.env.CUBEJS_DB_DOMAIN : undefined, // CosmosDB endpoint
+      storageAccount: process.env.CUBEJS_DB_NAME,
+      storageAccessKey: process.env.CUBEJS_DB_PASS,
+      host: process.env.CUBEJS_DB_HOST && process.env.CUBEJS_DB_HOST.trim().length > 0 ?
+        process.env.CUBEJS_DB_HOST : undefined,
       requestTimeout: 10 * 60 * 1000, // 10 minutes
       options: {
         useUTC: false
       },
       ...config
     };
-    this.config = config;
+
+    this.tableServicePromise = Promise.resolve(azure.createTableService(this.config.storageAccount, this.config.storageAccessKey, this.config.host));
+  }
+
+  static dialectClass() {
+    return AzureTablesQuery;
   }
 
   static driverEnvVariables() {
     return [
-      'CUBEJS_DB_HOST', 'CUBEJS_DB_NAME', 'CUBEJS_DB_PASS', 'CUBEJS_DB_DOMAIN'
+      'CUBEJS_DB_NAME', 'CUBEJS_DB_PASS', 'CUBEJS_DB_HOST'
     ];
   }
 
+  informationSchemaQuery() {
+    return 'GIMME_YULE';
+  }
+
   testConnection() {
-    return this.initialConnectPromise.then((pool) => pool.request().query('SELECT 1 as number'));
+    return new Promise((resolve, reject) => {
+      this.tableServicePromise.then(tblSvc => tblSvc.listTablesSegmented(null, null, (err, res) => {
+        if (err) {
+          reject(err);
+        }
+        else {
+          resolve(res != null);
+        }
+      }));
+    });
   }
 
   query(query, values) {
-    let cancelFn = null;
-    const promise = this.initialConnectPromise.then((pool) => {
-      const request = pool.request();
-      (values || []).forEach((v, i) => request.input(`_${i + 1}`, v));
+    console.log('querying', query, values);
 
-      // TODO time zone UTC set in driver ?
+    if (query === this.informationSchemaQuery()) {
+      return Promise.resolve([
+        { 'column_name': 'prid', 'table_name': 'PullRequests', 'table_schema': 'YULE', 'data_type': 'text' },
+        { 'column_name': 'commits', 'table_name': 'PullRequests', 'table_schema': 'YULE', 'data_type': 'text' },
+        { 'column_name': 'title', 'table_name': 'PullRequests', 'table_schema': 'YULE', 'data_type': 'text' },
+        { 'column_name': 'org', 'table_name': 'PullRequests', 'table_schema': 'YULE', 'data_type': 'text' },
+        { 'column_name': 'author', 'table_name': 'PullRequests', 'table_schema': 'YULE', 'data_type': 'text' },
+        { 'column_name': 'cid', 'table_name': 'PullRequestCommits', 'table_schema': 'YULE', 'data_type': 'text' },
+        { 'column_name': 'adds', 'table_name': 'PullRequestCommits', 'table_schema': 'YULE', 'data_type': 'text' },
+      ]);
+    }
 
-      cancelFn = () => request.cancel();
-      return request.query(query).then(res => res.recordset);
+    return new Promise((resolve, reject) => {
+      this.tableServicePromise.then((tblSvc) => {
+
+        const table = values.shift();
+        const tableQuery = new azure.TableQuery()
+          .top(5)
+          .where(query, ...values);
+
+        tblSvc.queryEntities(table, tableQuery, null, null, (err, res) => {
+          if (err) {
+            reject(err);
+          }
+          else {
+            resolve(res.entries);
+          }
+        });
+      });
     });
-    promise.cancel = () => cancelFn && cancelFn();
-    return promise;
   }
 
-  param(paramIndex) {
-    return `@_${paramIndex + 1}`;
+  getTablesQuery(schemaName) {
+    return new Promise((resolve, reject) => {
+      this.tableServicePromise.then(tblSvc => tblSvc.listTablesSegmented(null, null, (err, res) => {
+        if (err) {
+          reject(err);
+        }
+        else {
+          resolve(res.entries);
+        }
+      }));
+    });
   }
 
   createSchemaIfNotExists(schemaName) {
-    return this.query(
-      `SELECT schema_name FROM information_schema.schemata WHERE schema_name = ${this.param(0)}`,
-      [schemaName]
-    ).then((schemas) => {
-      if (schemas.length === 0) {
-        return this.query(`CREATE SCHEMA ${schemaName}`);
-      }
-      return null;
-    });
+    return Promise.resolve(null);
   }
 
   async downloadQueryResults(query, values) {
