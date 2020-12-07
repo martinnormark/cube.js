@@ -12,17 +12,21 @@ const GRANULARITY_TO_INTERVAL = {
 
 class AzureTablesQuery extends BaseQuery {
   convertTz(field) {
-    return `${field} AT TIME ZONE '${this.timezone}'`;
+    return `${field}`;
   }
 
-  // eslint-disable-next-line no-unused-vars
-  timeStampParam(timeDimension) {
-    return this.timeStampCast(`?`);
-  }
+  // // eslint-disable-next-line no-unused-vars
+  // timeStampParam(timeDimension) {
+  //   return this.timeStampCast(`?`);
+  // }
 
-  timeGroupedColumn(granularity, dimension) {
-    return `TRUNC(${dimension}, '${GRANULARITY_TO_INTERVAL[granularity]}')`;
-  }
+  // timeGroupedColumn(granularity, dimension) {
+  //   return `${dimension}__DAY`;
+  // }
+
+  // escapeColumnName(name) {
+  //   return `${name}`;
+  // }
 }
 
 module.exports = AzureTablesQuery;
