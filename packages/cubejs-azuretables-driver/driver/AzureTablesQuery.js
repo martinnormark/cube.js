@@ -15,18 +15,33 @@ class AzureTablesQuery extends BaseQuery {
     return `${field}`;
   }
 
-  // // eslint-disable-next-line no-unused-vars
-  // timeStampParam(timeDimension) {
-  //   return this.timeStampCast(`?`);
-  // }
+  timeStampParam(timeDimension) {
+    return this.timeStampCast(`?`);
+  }
 
-  // timeGroupedColumn(granularity, dimension) {
-  //   return `${dimension}__DAY`;
-  // }
+  timeStampCast(value) {
+    return `${value}`;
+  }
 
-  // escapeColumnName(name) {
-  //   return `${name}`;
-  // }
+  dateTimeCast(value) {
+    return `${value}`;
+  }
+
+  subtractInterval(date, interval) {
+    return `${date}`;
+  }
+
+  addInterval(date, interval) {
+    return `${date}`;
+  }
+
+  timeGroupedColumn(granularity, dimension) {
+    return `${dimension}`;
+  }
+
+  escapeColumnName(name) {
+    return `${name}`;
+  }
 }
 
 module.exports = AzureTablesQuery;

@@ -71,10 +71,12 @@ class AzureTablesDriver extends BaseDriver {
     if (query === this.getTablesQuery())
       return this.getTables();
 
-    if (query?.startsWith('SELECT'))
-    {
-      query = query.replace('"', '');
-      
+    // Handle cube.js special query, by naively returning the value expected.
+    if (query?.startsWith('SELECT FLOOR((EXTRACT')) {
+      return Promise.resolve([Math.floor(Date.now() / 10)]);
+    }
+
+    if (query?.startsWith('SELECT')) {
       try {
         const { tableList, columnList, ast } = parser.parse(query);
         console.log('parsed SQL', tableList, columnList, ast);
